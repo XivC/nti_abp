@@ -51,18 +51,16 @@ class BD:
 																так как содержится буква в числе])
 		"""
 		list_of_traces = []
-		index = 0
-		index_line = 1
+		index_line = 0
+		dron_table = []
 		for detail in details_table:
 			flag, string = self.filter.is_digit(detail[0])
+			index_line += 1
 			if flag:
 				list_of_traces.append(string.format(index_line, "Таблице деталей"))
-				index_line += 1
-				del details_table[index]
 				continue
-			index_line += 1
-			index += 1
-		return (details_table, list_of_traces)
+			dron_table.append(dron)
+		return (dron_table, list_of_traces)
 
 	def filter_drons_table(self, drons_table):
 		"""
@@ -72,22 +70,20 @@ class BD:
 																		так как содержится буква в числе])
 		"""
 		list_of_traces = []
-		index = 0
-		index_line = 1
+		index_line = 0
+		drons_tabl = []
 		for dron in drons_table:
 			flag1, string1 = self.filter.is_digit(dron[0])
 			flag2, string2 = self.filter.is_digit(dron[2])
+			index_line += 1
 			if flag1 or flag2:
 				if flag1:
 					list_of_traces.append(string1.format(index_line, 'Таблице дронов'))
 				else:
 					list_of_traces.append(string2.format(index_line, "Таблице дронов"))
-				index_line += 1
-				del drons_table[index]
 				continue
-			index_line += 1
-			index += 1
-		return (drons_table, list_of_traces)
+			drons_tabl.append(dron)
+		return (drons_tabl, list_of_traces)
 
 	def filter_dron_map(self, dron_map):
 		"""
@@ -97,27 +93,27 @@ class BD:
 																		так как содержится буква в числе])
 		"""
 		list_of_traces = []
-		index = 0
-		index_line = 1
+		index_line = 0
+		dron_tabl = []
 		for dron in dron_map:
 			flag1, string1 = self.filter.is_digit(dron[1])
 			flag2, string2 = self.filter.is_digit(dron[3])
+			index_line += 1
 			if flag1 or flag2:
 				if flag1:
 					list_of_traces.append(string1.format(index_line, "Технологические карты"))
 				else:
 					list_of_traces.append(string2.format(index_line, "Технологические карты"))
-				index_line += 1
-				del dron_map[index]
 				continue
-			index_line += 1
-			index += 1
+			dron_tabl.append(dron)
 		return (dron_map, list_of_traces)
 
 
 class Filter:
 
 	def is_digit(self, string):
+		if type(string) == type(1) or type(string) == type(1.0):
+			return (False, "Все хорошо")
 		if not string.isdigit():
 			return (True, "строка {} не записана в {} базу данных, так как содержится буква в числе")
 		return (False, "Все хорошо")
