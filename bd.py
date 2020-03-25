@@ -9,6 +9,7 @@ class BD:
 		""" инитиализация курсора и бд"""
 		self.conn = sqlite3.connect(name_bd)
 		self.cursor = self.conn.cursor()
+		self.filter = Filter()
 
 	def create_tables(self):
 		""" Creating new base of date"""
@@ -28,14 +29,19 @@ class BD:
 		return True
 
 	def insert_in_tables(self, details_table=[], drons_table=[], dron_map=[]):
-
-		details_table = self.filter_details_table(details_table)
+		details_table = tuple(details_table)
+		drons_table = tuple(drons_table)
+		dron_map = tuple(dron_map)
+		details_table, list_of_traces1 = self.filter_details_table(details_table)
 		self.cursor.executemany("INSERT INTO details VALUES (?,?,?)", details_table)
 		self.conn.commit()
+		drons_table, list_of_traces2 = self.filter_details_table(drons_table)
 		self.cursor.executemany("INSERT INTO drons VALUES (?,?,?)", drons_table)
 		self.conn.commit()
+		dron_map, list_of_traces3 = self.filter_details_table(dron_map)
 		self.cursor.executemany("INSERT INTO dron_map VALUES (?,?,?,?)", dron_map)
 		self.conn.commit()
+		return list_of_traces1 + list_of_traces3 + list_of_traces2
 
 	def filter_details_table(self, details_table):
 		"""
@@ -44,9 +50,19 @@ class BD:
 		:return: ([list for table], [лист ошибок почему вида : строка 23 не записана в бд,
 																так как содержится буква в числе])
 		"""
+		list_of_traces = []
+		index = 0
 		index_line = 1
 		for detail in details_table:
-			detail[0]
+			flag, string = self.filter.is_digit(detail[0])
+			if flag:
+				list_of_traces.append(string.format(index_line, "Таблице деталей"))
+				index_line += 1
+				del details_table[index]
+				continue
+			index_line += 1
+			index += 1
+		return (details_table, list_of_traces)
 
 	def filter_drons_table(self, drons_table):
 		"""
@@ -55,7 +71,23 @@ class BD:
 			:return: ([list for table], [лист ошибок почему вида : строка 23 не записана в бд,
 																		так как содержится буква в числе])
 		"""
-		pass
+		list_of_traces = []
+		index = 0
+		index_line = 1
+		for dron in drons_table:
+			flag1, string1 = self.filter.is_digit(dron[0])
+			flag2, string2 = self.filter.is_digit(dron[2])
+			if flag1 or flag2:
+				if flag1:
+					list_of_traces.append(string1.format(index_line, 'Таблице дронов'))
+				else:
+					list_of_traces.append(string2.format(index_line, "Таблице дронов"))
+				index_line += 1
+				del drons_table[index]
+				continue
+			index_line += 1
+			index += 1
+		return (drons_table, list_of_traces)
 
 	def filter_dron_map(self, dron_map):
 		"""
@@ -64,7 +96,31 @@ class BD:
 			:return: ([list for table], [лист ошибок почему вида : строка 23 не записана в бд,
 																		так как содержится буква в числе])
 		"""
-		pass
+		list_of_traces = []
+		index = 0
+		index_line = 1
+		for dron in dron_map:
+			flag1, string1 = self.filter.is_digit(dron[1])
+			flag2, string2 = self.filter.is_digit(dron[3])
+			if flag1 or flag2:
+				if flag1:
+					list_of_traces.append(string1.format(index_line, "Технологические карты"))
+				else:
+					list_of_traces.append(string2.format(index_line, "Технологические карты"))
+				index_line += 1
+				del dron_map[index]
+				continue
+			index_line += 1
+			index += 1
+		return (dron_map, list_of_traces)
+
+
+class Filter:
+
+	def is_digit(self, string):
+		if not string.isdigit():
+			return (True, "строка {} не записана в {} базу данных, так как содержится буква в числе")
+		return (False, "Все хорошо")
 
 
 def test_bd():
