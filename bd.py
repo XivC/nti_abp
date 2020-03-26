@@ -23,6 +23,19 @@ class BD:
 			(id, name, detail, count_detail)
 			""")
 		self.conn.commit()
+
+		self.cursor.execute("""
+			CREATE TABLE IF NOT EXISTS count_details
+			(id, count)
+			""")
+		self.conn.commit()
+
+		self.cursor.execute("""
+			CREATE TABLE IF NOT EXISTS count_engins
+			(id, serial_number)
+		""")
+		self.conn.commit()
+
 		return True
 
 	def insert_in_tables(self, details_table=[], drons_table=[], dron_map=[]):
@@ -39,6 +52,30 @@ class BD:
 		self.conn.commit()
 		
 		return list_of_traces1 + list_of_traces3 + list_of_traces2
+
+	def is_detail(self, name_detail):
+		"""Возвращает деталь ли это"""
+		# TODO me
+		return True
+
+	def is_engine(self, name_engine):
+		"""Возвращает двигатель это или нет?"""
+		# TODO me
+		return True
+
+	def give_all_details(self):
+		"""Возвращает список всех деталий"""
+		# TODO me
+		return ['detail1', 'detail2', 'detail3']
+
+	def write_in_bd(self, sl):
+		"""принимает на вход словарь. И записывает его в бд
+			sl = {
+				'detail1': ['adarrea233', 1], # Это двигатель
+				'detail2': ['', 123]          # Это не двигатель
+			}
+		"""
+		return True
 
 
 class Filter:
