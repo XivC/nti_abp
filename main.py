@@ -2,13 +2,10 @@
 	Главный файл, тут будет все запускные механизмы и т.д.
 """
 import bd
+import front
 
-
-def main():
-	BD = bd.BD("cursor", "BASE")
-	BD.create_bd() # Создание базы данных
-	return 0;
-
+bdd = bd.BD()
+bdd.create_tables() # Создание базы данных
 
 if __name__ == "__main__":
-	main()
+	front.mainWindow()

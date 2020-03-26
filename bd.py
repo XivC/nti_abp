@@ -136,5 +136,3 @@ def test_bd():
 	bd.insert_in_tables(drons_table=drons_table,
 						dron_map=dron_map,
 						details_table=details_table)
-
-test_bd()
