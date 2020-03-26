@@ -6,6 +6,7 @@ class BD:
 		""" инитиализация курсора и бд"""
 		self.conn = sqlite3.connect(name_bd)
 		self.cursor = self.conn.cursor()
+
 		self.filter = Filter()
 
 	def create_tables(self):
@@ -25,19 +26,8 @@ class BD:
 		self.conn.commit()
 
 		self.cursor.execute("""
-			CREATE TABLE IF NOT EXISTS count_details
-			(id, count)
-			""")
-		self.conn.commit()
-
-		self.cursor.execute("""
-			CREATE TABLE IF NOT EXISTS count_engins
-			(id, serial_number)
-		""")
-
-		self.cursor.execute("""
 			CREATE TABLE IF NOT EXISTS receipts
-			(id, date, name)
+			(name, seria, count, name_admin, id_receipt, date)
 		""")
 
 		self.conn.commit()
@@ -67,7 +57,6 @@ class BD:
 
 	def is_engine(self, name_engine):
 		"""Возвращает двигатель это или нет?"""
-		# TODO me
 		self.cursor.execute('SELECT type FROM details WHERE name_detail = ?', (name_engine,))
 		data = self.cursor.fetchone()[0]
 		return data == 'Аккумуляторные батареи' or data == 'batter'
@@ -77,13 +66,15 @@ class BD:
 		self.cursor.execute('SELECT* FROM "main"."details"')
 		return self.cursor.fetchall()
 
-	def write_in_bd(self, sl):
-		"""принимает на вход словарь. И записывает его в бд
-			sl = {
-				'detail1': ['adarrea233', 1], # Это двигатель
-				'detail2': ['', 123]          # Это не двигатель
-			}
+	def write_receipt_in_bd(self, data):
 		"""
+		Записывают в базу данных поставки
+		:param data: список кортежей в каждом кортеже строчка из бд
+		:return: True
+		"""
+
+		self.cursor.executemany("""INSERT INTO receipts values (?, ?, ?, ?, ?, ?)""", data)
+		self.conn.commit()
 		return True
 
 
@@ -198,10 +189,21 @@ class Test:
 	def test_is_detail(self):
 		print('is detail1', self.bd.is_detail('detail1'))
 		print('is detail6', self.bd.is_detail('detail6'))
-"""
+
+	def test_receipts_add(self):
+		id = '00001'
+		date = '31.12.2003'
+		name = 'Zaripov'
+		data = [
+			['АКБ Сириус 1', 'AJLKF22', 1, name, id, date],
+			['АКБ Сириус 1', 'AJLKF23', 1, name, id, date],
+			['Лопасть РР2', '', 23, name, id, date]
+		]
+		self.bd.write_receipt_in_bd(data)
+
 test = Test()
 test.test_bd()
 test.test_give_all_details()
 test.test_is_engine()
 test.test_is_detail()
-"""
+test.test_receipts_add()
