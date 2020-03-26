@@ -34,6 +34,12 @@ class BD:
 			CREATE TABLE IF NOT EXISTS count_engins
 			(id, serial_number)
 		""")
+
+		self.cursor.execute("""
+			CREATE TABLE IF NOT EXISTS receipts
+			(id, date, name)
+		""")
+
 		self.conn.commit()
 
 		return True
