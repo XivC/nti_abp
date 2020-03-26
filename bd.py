@@ -114,8 +114,6 @@ class Filter:
 		return (filtered_dron_map_table, list_of_traces)
 
 
-
-
 def test_bd():
 	# Тестовые данные
 	details_table = [
