@@ -63,7 +63,6 @@ class BD:
 		"""Возвращает двигатель это или нет?"""
 		# TODO me
 		self.cursor.execute('SELECT type FROM details WHERE name_detail = ?', (name_engine,))
-		print(self.cursor.fetchone())
 		data = self.cursor.fetchone()[0]
 		return data == 'Аккумуляторные батареи' or data == 'batter'
 
@@ -166,7 +165,7 @@ class Test:
 		details_table = [
 			[1, 'detail1', 'batter'],
 			[2, 'detail2', 'batter'],
-			[3, 'dateil3', 'other']
+			[3, 'detail3', 'other']
 		]
 		drons_table = [
 			[1, 'dron1', 100],
@@ -190,8 +189,13 @@ class Test:
 		print('detail1 is engine', self.bd.is_engine('detail1'))
 		print('detail3 is engine', self.bd.is_engine('detail3'))
 
-
+	def test_is_detail(self):
+		print('is detail1', self.bd.is_detail('detail1'))
+		print('is detail6', self.bd.is_detail('detail6'))
+"""
 test = Test()
 test.test_bd()
 test.test_give_all_details()
 test.test_is_engine()
+test.test_is_detail()
+"""
