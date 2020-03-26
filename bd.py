@@ -55,18 +55,22 @@ class BD:
 
 	def is_detail(self, name_detail):
 		"""Возвращает деталь ли это"""
-		# TODO me
-		return True
+		self.cursor.execute('SELECT count(*) FROM details WHERE name_detail = ?', (name_detail,))
+		data = self.cursor.fetchone()[0]
+		return data > 0
 
 	def is_engine(self, name_engine):
 		"""Возвращает двигатель это или нет?"""
 		# TODO me
-		return True
+		self.cursor.execute('SELECT type FROM details WHERE name_detail = ?', (name_engine,))
+		print(self.cursor.fetchone())
+		data = self.cursor.fetchone()[0]
+		return data == 'Аккумуляторные батареи' or data == 'batter'
 
 	def give_all_details(self):
 		"""Возвращает список всех деталий"""
-		# TODO me
-		return ['detail1', 'detail2', 'detail3']
+		self.cursor.execute('SELECT* FROM "main"."details"')
+		return self.cursor.fetchall()
 
 	def write_in_bd(self, sl):
 		"""принимает на вход словарь. И записывает его в бд
@@ -151,25 +155,43 @@ class Filter:
 		return (filtered_dron_map_table, list_of_traces)
 
 
-def test_bd():
-	# Тестовые данные
-	details_table = [
-		[1, 'detail1', 'batter'],
-		[2, 'detail2', 'batter'],
-		[3, 'dateil3', 'other']
-	]
-	drons_table = [
-		[1, 'dron1', 100],
-		[2, 'dron2', 300]
-	]
-	dron_map = [
-		[1, 'dron1', 'detail1', 23],
-		[1, 'dron1', 'detail2', 2],
-		[2, 'dron2', 'detail1', 1],
-		[2, 'dron2', 'detail2', 345]
-	]
-	bd = BD()
-	bd.create_tables()
-	bd.insert_in_tables(drons_table=drons_table,
+class Test:
+
+	def __init__(self):
+		self.bd = BD("TestBD.sqlite")
+		self.bd.create_tables()
+
+	def test_bd(self):
+		# Тестовые данные
+		details_table = [
+			[1, 'detail1', 'batter'],
+			[2, 'detail2', 'batter'],
+			[3, 'dateil3', 'other']
+		]
+		drons_table = [
+			[1, 'dron1', 100],
+			[2, 'dron2', 300]
+		]
+		dron_map = [
+			[1, 'dron1', 'detail1', 23],
+			[1, 'dron1', 'detail2', 2],
+			[2, 'dron2', 'detail1', 1],
+			[2, 'dron2', 'detail2', 345]
+		]
+		self.bd.insert_in_tables(drons_table=drons_table,
 						dron_map=dron_map,
 						details_table=details_table)
+
+	def test_give_all_details(self):
+		print("test_give_all_details")
+		print(self.bd.give_all_details())
+
+	def test_is_engine(self):
+		print('detail1 is engine', self.bd.is_engine('detail1'))
+		print('detail3 is engine', self.bd.is_engine('detail3'))
+
+
+test = Test()
+test.test_bd()
+test.test_give_all_details()
+test.test_is_engine()
