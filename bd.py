@@ -152,7 +152,10 @@ class BD:
 			"""
 		)
 		data = self.cursor.fetchall()
-		return data
+		ms = []
+		for i in data:
+			ms.append(i + (self.give_request_sum(i[0]),))
+		return ms
 
 	def give_request_sum(self, request_id):
 		"""
@@ -170,8 +173,11 @@ class BD:
 		return sum
 
 	def give_dron_sum(self, dron):
-
-		return 200 * dron[1]# TODO ME
+		self.cursor.execute("""
+			SELECT cost FROM drons WHERE name_dron = ?
+		""", (dron[0],))
+		cost = self.cursor.fetchone()[0]
+		return cost * dron[1]
 
 	def change_status_request(self, request_id, status):
 		"""
@@ -332,6 +338,7 @@ class Test1:
 
 	def test(self):
 		#self.test_requests()
+		self.bd.give_all_requests()
 		self.bd.change_status_request(11, 'all okey')
 		print(self.bd.give_request_sum(11))
 		return True
