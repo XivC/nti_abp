@@ -117,7 +117,7 @@ class BD:
 			ls.append((key[0], key[1], ms[key]))
 		return ls
 
-	def create_new_request(self, create_date, change_date, buyer, list_of_drons, status='Создано', delete_date=""):
+	def create_new_request(self, create_date, buyer, list_of_drons, status='Создано', change_date='', delete_date=""):
 		"""
 		list_of_drons = [(dron_name, count), ...]
 		:return:
