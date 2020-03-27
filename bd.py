@@ -120,6 +120,12 @@ class BD:
 			ls.append((key[0], key[1], ms[key]))
 		return ls
 
+	def give_drons(self):
+		self.cursor.execute("""
+			SELECT * FROM drons
+		""")
+		return self.cursor.fetchall()
+
 	def create_new_request(self, create_date, buyer, list_of_drons, status='Создано', change_date='', delete_date=""):
 		"""
 		list_of_drons = [(dron_name, count), ...]
@@ -142,6 +148,15 @@ class BD:
 				INSERT INTO buy_drons VALUES (?, ?, ?)
 			""", (id, dron[0], dron[1]))
 			self.conn.commit()
+
+		#TODO test me
+		if not self.check_buyer_in_fsb(buyer):
+			self.add_buyer_in_fsb(buyer)
+			self.change_status_request(request_id=id, status="Запрошено разрешение у ФСБ")
+		elif self.give_status_buyer_fsb(buyer):
+			self.change_status_request(request_id=id, status='Произвести сборку')
+		else:
+			self.change_status_request(request_id=id, status='Анулирована', delete_date=give_day())
 
 
 
@@ -182,7 +197,7 @@ class BD:
 		cost = self.cursor.fetchone()[0]
 		return cost * dron[1]
 
-	def change_status_request(self, request_id, status):
+	def change_status_request(self, request_id, status, delete_day=''):
 		"""
 		Меняет статус заказа
 
@@ -197,8 +212,8 @@ class BD:
 		:return: True, if accessly, and False another
 		"""
 		self.cursor.execute("""
-			UPDATE requests SET status = (?), change_date = (?) WHERE id = (?)
-		""", (status, give_day(), request_id))
+			UPDATE requests SET status = (?), change_date = (?), delete_date = (?) WHERE id = (?)
+		""", (status, give_day(), delete_day, request_id))
 		self.conn.commit()
 
 	def add_buyer_in_fsb(self, buyer, status=0):
