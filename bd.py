@@ -138,7 +138,7 @@ class Filter:
 		index_line = 0
 		filtered_dron_map_table = []
 		for dron in dron_map:	
-			flag1, string1 = self.is_digit(dron[1])
+			flag1, string1 = self.is_digit(dron[0])
 			flag2, string2 = self.is_digit(dron[3])
 			index_line += 1
 			if flag1 or flag2:
@@ -191,6 +191,7 @@ class Test:
 		print('is detail6', self.bd.is_detail('detail6'))
 
 	def test_receipts_add(self):
+		print('--TESTING RECEIPTS')
 		id = '00001'
 		date = '31.12.2003'
 		name = 'Zaripov'
@@ -201,9 +202,47 @@ class Test:
 		]
 		self.bd.write_receipt_in_bd(data)
 
+	def test_is_digit(self):
+		print('--TESTING IS DIGIT')
+		print(self.bd.filter.is_digit(12))
+		print(self.bd.filter.is_digit(15))
+		print(self.bd.filter.is_digit("ter"))
+
+	def test_filters(self):
+		details_table = [
+			[1, 'detail1', 'batter'],
+			[2, 'detail2', 'batter'],
+			[3, 'detail3', 'other']
+		]
+		drons_table = [
+			[1, 'dron1', 100],
+			[2, 'dron2', 300]
+		]
+		dron_map = [
+			[1, 'dron1', 'detail1', 23],
+			[1, 'dron1', 'detail2', 2],
+			[2, 'dron2', 'detail1', 1],
+			[2, 'dron2', 'detail2', 345]
+		]
+		print('--TESTING FILTERS')
+		data = self.bd.filter.filter_details_table(details_table)
+		print(data)
+		data = self.bd.filter.filter_dron_map(dron_map)
+		print(data)
+		data = self.bd.filter.filter_drons_table(drons_table)
+		print(data)
+
+
+"""
 test = Test()
 test.test_bd()
 test.test_give_all_details()
 test.test_is_engine()
 test.test_is_detail()
 test.test_receipts_add()
+"""
+"""
+test = Test()
+test.test_is_digit()
+test.test_filters()
+"""
