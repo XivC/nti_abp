@@ -85,6 +85,18 @@ class BD:
 		self.cursor.execute("SELECT * FROM receipts WHERE date <= ?", (date,))
 		return self.cursor.fetchall()
 
+	def give_list_of_last_details(self, date):
+		data = self.give_all_less_date(date)
+		ms = dict()
+		for collum in data:
+			if not (collum[0], collum[4]) in ms:
+				ms[(collum[0], collum[4])] = 0
+			ms[(collum[0], collum[4])] += collum[2]
+		ls = []
+		for key in ms:
+			ls.append((key[0], key[1], ms[key]))
+		return ls
+
 
 class Filter:
 
@@ -245,8 +257,8 @@ class Test:
 		print(data)
 
 	def test_give_me_spisok_of_receipts(self, date='2020-12-31'):
-		data = self.bd.give_all_less_date(date)
-		ms = []
+		data = self.bd.give_list_of_last_details(date)
+		return data
 
 
 """
@@ -264,3 +276,4 @@ test.test_filters()
 """
 test = Test()
 test.test_give_all_colums_less_date('2021-12-03')
+print(test.test_give_me_spisok_of_receipts())
