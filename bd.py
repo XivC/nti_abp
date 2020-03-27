@@ -77,6 +77,14 @@ class BD:
 		self.conn.commit()
 		return True
 
+	def give_all_less_date(self, date):
+		"""
+		:param date:  string type 2020-02-26
+		:return: all collums with dates
+		"""
+		self.cursor.execute("SELECT * FROM receipts WHERE date <= ?", (date,))
+		return self.cursor.fetchall()
+
 
 class Filter:
 
@@ -192,8 +200,8 @@ class Test:
 
 	def test_receipts_add(self):
 		print('--TESTING RECEIPTS')
-		id = '00001'
-		date = '31.12.2003'
+		id = '00002'
+		date = '2020-10-1'
 		name = 'Zaripov'
 		data = [
 			['АКБ Сириус 1', 'AJLKF22', 1, name, id, date],
@@ -232,6 +240,14 @@ class Test:
 		data = self.bd.filter.filter_drons_table(drons_table)
 		print(data)
 
+	def test_give_all_colums_less_date(self, date='2020-12-31'):
+		data = self.bd.give_all_less_date(date)
+		print(data)
+
+	def test_give_me_spisok_of_receipts(self, date='2020-12-31'):
+		data = self.bd.give_all_less_date(date)
+		ms = []
+
 
 """
 test = Test()
@@ -246,3 +262,5 @@ test = Test()
 test.test_is_digit()
 test.test_filters()
 """
+test = Test()
+test.test_give_all_colums_less_date('2021-12-03')
