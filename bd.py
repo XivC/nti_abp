@@ -33,6 +33,25 @@ class BD:
 
 		self.conn.commit()
 
+		self.cursor.execute("""
+			CREATE TABLE IF NOT EXISTS requests 
+			(id INTEGER PRIMARY KEY AUTOINCREMENT, create_date TEXT, change_date TEXT, delete_date TEXT, buyer TEXT 
+			, status TEXT) 
+		""")
+		self.conn.commit()
+
+		self.cursor.execute("""
+			CREATE TABLE IF NOT EXISTS fsb
+			(buyer TEXT, bool INTEGER)
+		""")
+		self.conn.commit()
+
+		self.cursor.execute("""
+			CREATE TABLE IF NOT EXISTS buy_drons
+			(id, dron_name, count)
+		""")
+		self.conn.commit()
+
 		return True
 
 	def insert_in_tables(self, details_table=[], drons_table=[], dron_map=[]):
@@ -97,6 +116,57 @@ class BD:
 		for key in ms:
 			ls.append((key[0], key[1], ms[key]))
 		return ls
+
+	def create_new_request(self):
+		self.cursor.execute(
+			"""INSERT INTO requests values (?, ?, )"""
+		)
+
+	def give_all_requests(self):
+		"""
+		:return ms = [[id, create_date, change_date, status, sum], ...]
+		"""
+		# TODO me
+		pass
+
+	def give_request_sum(self, request_id):
+		"""
+		Считает сумму заказа и возвращает ее
+		:param request_id: unique id of request in table
+		:return: sum of request
+		"""
+		# TODO ME
+		pass
+
+	def change_status_request(self, request_id):
+		"""
+		Меняет статус заказа
+
+		Создана
+		Идет сборка
+		Готова к отгрузке
+		Запрошено разрешение у ФСБ
+		Анулирована
+		Отгружена
+
+		:param request_id: unique id in table of requests
+		:return: True, if accessly, and False another
+		"""
+		# TODO ME
+		pass
+
+	def change_status_fsb(self, buyer):
+		"""
+		Меняет статус у фсб
+
+		0 - если нет разрешения
+		1 - если да
+
+		:param buyer: Имя покупателя строки
+		:return: True/False if okey
+		"""
+		# TODO ME
+		pass
 
 
 class Filter:
@@ -183,6 +253,19 @@ class Filter:
 			filtered_dron_map_table.append(dron)
 		return (filtered_dron_map_table, list_of_traces)
 
+
+class Test1:
+
+	def __init__(self):
+		self.bd = BD("Test1BD.sqlite")
+		self.bd.create_tables()
+
+	def test_requests(self):
+		self.bd.create_new_request()
+		self.bd.change_status_request()
+
+	def test(self):
+		return True
 
 class Test:
 
