@@ -100,10 +100,22 @@ class BD:
 
 class Filter:
 
+	def __init__(self):
+		import datetime
+		self.datetime = datetime
+
 	def is_digit(self, string):
 		if not str(string).isdigit():
 			return (True, "строка {} не записана в {} базу данных, так как содержится буква в числе")
 		return (False, "Все хорошо")
+
+	def check_date(self, date='2020-12-01'):
+		date_format = '%Y-%m-%d'
+		try:
+			date_obj = self.datetime.datetime.strptime(date, date_format)
+			return True
+		except ValueError:
+			return False
 
 	def filter_details_table(self, details_table):
 		"""
@@ -274,6 +286,8 @@ test = Test()
 test.test_is_digit()
 test.test_filters()
 """
+"""
 test = Test()
 test.test_give_all_colums_less_date('2021-12-03')
 print(test.test_give_me_spisok_of_receipts())
+"""
