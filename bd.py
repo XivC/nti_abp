@@ -160,10 +160,20 @@ class BD:
 		:param request_id: unique id of request in table
 		:return: sum of request
 		"""
-		# TODO ME
-		pass
+		self.cursor.execute("""
+			SELECT dron_name, count FROM buy_drons WHERE id = ?
+		""", (request_id,))
+		data = self.cursor.fetchall()
+		sum = 0
+		for dron in data:
+			sum += self.give_dron_sum(dron)
+		return sum
 
-	def change_status_request(self, request_id):
+	def give_dron_sum(self, dron):
+
+		return 200 * dron[1]# TODO ME
+
+	def change_status_request(self, request_id, status):
 		"""
 		Меняет статус заказа
 
@@ -177,8 +187,10 @@ class BD:
 		:param request_id: unique id in table of requests
 		:return: True, if accessly, and False another
 		"""
-		# TODO ME
-		pass
+		self.cursor.execute("""
+			UPDATE requests SET status = (?) WHERE id = (?)
+		""", (status, request_id))
+		self.conn.commit()
 
 	def change_status_fsb(self, buyer):
 		"""
@@ -319,7 +331,9 @@ class Test1:
 		print(self.bd.give_all_requests())
 
 	def test(self):
-		self.test_requests()
+		#self.test_requests()
+		self.bd.change_status_request(11, 'all okey')
+		print(self.bd.give_request_sum(11))
 		return True
 
 Test1().test()
