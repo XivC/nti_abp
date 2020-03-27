@@ -117,17 +117,42 @@ class BD:
 			ls.append((key[0], key[1], ms[key]))
 		return ls
 
-	def create_new_request(self):
+	def create_new_request(self, create_date, change_date, buyer, list_of_drons, status='Создано', delete_date=""):
+		"""
+		list_of_drons = [(dron_name, count), ...]
+		:return:
+		"""
 		self.cursor.execute(
-			"""INSERT INTO requests values (?, ?, )"""
+			"""INSERT INTO requests (create_date, change_date,
+		  delete_date, buyer, status ) values (?, ?, ?, ?, ?)""", (create_date, change_date,
+		  delete_date, buyer, status)
 		)
+		self.conn.commit()
+
+		self.cursor.execute("""
+		SELECT last_insert_rowid()  FROM requests
+		""")
+		id = self.cursor.fetchone()[0]
+
+		for dron in list_of_drons:
+			self.cursor.execute("""
+				INSERT INTO buy_drons VALUES (?, ?, ?)
+			""", (id, dron[0], dron[1]))
+			self.conn.commit()
+
+
 
 	def give_all_requests(self):
 		"""
 		:return ms = [[id, create_date, change_date, status, sum], ...]
 		"""
-		# TODO me
-		pass
+		self.cursor.execute(
+			"""
+				SELECT id, create_date, change_date, status FROM requests
+			"""
+		)
+		data = self.cursor.fetchall()
+		return data
 
 	def give_request_sum(self, request_id):
 		"""
@@ -260,12 +285,44 @@ class Test1:
 		self.bd = BD("Test1BD.sqlite")
 		self.bd.create_tables()
 
+	def test_bd(self):
+		# Тестовые данные
+		details_table = [
+			[1, 'detail1', 'batter'],
+			[2, 'detail2', 'batter'],
+			[3, 'detail3', 'other']
+		]
+		drons_table = [
+			[1, 'dron1', 100],
+			[2, 'dron2', 300]
+		]
+		dron_map = [
+			[1, 'dron1', 'detail1', 23],
+			[1, 'dron1', 'detail2', 2],
+			[2, 'dron2', 'detail1', 1],
+			[2, 'dron2', 'detail2', 345]
+		]
+		self.bd.insert_in_tables(drons_table=drons_table,
+						dron_map=dron_map,
+						details_table=details_table)
+
 	def test_requests(self):
-		self.bd.create_new_request()
-		self.bd.change_status_request()
+		self.bd.create_new_request(
+			create_date='2019-12-03',
+			delete_date='',
+			change_date='2019-12-03',
+			buyer='Zaripov',
+			status='Создано',
+			list_of_drons=[('dron1', 3)]
+		)
+		# self.bd.change_status_request()
+		print(self.bd.give_all_requests())
 
 	def test(self):
+		self.test_requests()
 		return True
+
+Test1().test()
 
 class Test:
 
