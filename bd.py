@@ -1,5 +1,8 @@
 import sqlite3
-
+from datetime import datetime
+def give_day():
+	today = datetime.today()
+	return (str(today.year)+"-"+str(today.month)+"-"+str(today.day))
 
 class BD:
 	def __init__(self, name_bd="mybd.sqlite"):
@@ -194,11 +197,24 @@ class BD:
 		:return: True, if accessly, and False another
 		"""
 		self.cursor.execute("""
-			UPDATE requests SET status = (?) WHERE id = (?)
-		""", (status, request_id))
+			UPDATE requests SET status = (?), change_date = (?) WHERE id = (?)
+		""", (status, give_day(), request_id))
 		self.conn.commit()
 
-	def change_status_fsb(self, buyer):
+	def add_buyer_in_fsb(self, buyer, status=0):
+		self.cursor.execute("""
+			INSERT INTO fsb values (?, ?)
+		""", (buyer, status))
+		self.conn.commit()
+		# TODO TESTING THAT FUNCTION
+
+	def check_buyer_in_fsb(self, buyer):
+		self.cursor.execute("""
+			SELECT count(*) FROM fsb WHERE buyer=(?)
+		""", (buyer,))
+		return self.cursor.fetchone()[0] == 1
+
+	def change_status_fsb(self, buyer, status=1):
 		"""
 		Меняет статус у фсб
 
@@ -208,8 +224,12 @@ class BD:
 		:param buyer: Имя покупателя строки
 		:return: True/False if okey
 		"""
-		# TODO ME
-		pass
+		self.cursor.execute("""
+			UPDATE fsb SET status = (?) WHERE buyer=(?)
+		""", (status, buyer))
+		self.conn.commit()
+		# TODO test me please, oh god, please deeper
+		return True
 
 
 class Filter:
