@@ -211,10 +211,47 @@ class BD:
 		:param request_id: unique id in table of requests
 		:return: True, if accessly, and False another
 		"""
+		if status == "Готова к отгрузке" :
+			if self.check_count_of_details(request_id):
+				self.minus_details(request_id)
+			else :
+				return None
+
 		self.cursor.execute("""
 			UPDATE requests SET status = (?), change_date = (?), delete_date = (?) WHERE id = (?)
 		""", (status, give_day(), delete_day, request_id))
 		self.conn.commit()
+		return True
+	def minus_detail(self, request_id):
+
+	def check_count_of_details(self, request_id):
+		self.cursor.execute("""
+			SELECT * FROM buy_drons""")# WHERE id = (?)""", (request_id,))
+		drons = self.cursor.fetchall()
+		print(drons)
+		need = {}
+		for dron in drons:
+			self.cursor.execute("""
+				SELECT * FROM dron_map WHERE name = (?)
+			""", (dron[1],))
+			details = self.cursor.fetchall()
+			for detail in details:
+				if not detail[2] in need:
+					need[detail[2]] = 0
+				need[detail[2]] = int(detail[3]) * int(dron[2])
+		for key in need:
+			sm = 0
+			self.cursor.execute("""
+				SELECT count FROM receipts  WHERE name = ?
+			""", (key, ))
+			details = self.cursor.fetchall()
+			print(details, sm)
+			for detail in details:
+				sm = sm + int(detail[0])
+			if need[key] - sm < 0:
+				return False
+		return True
+
 
 	def add_buyer_in_fsb(self, buyer, status=0):
 		self.cursor.execute("""
@@ -488,3 +525,7 @@ test = Test()
 test.test_give_all_colums_less_date('2021-12-03')
 print(test.test_give_me_spisok_of_receipts())
 """
+
+db = BD()
+db.create_tables()
+print(db.check_count_of_details(2))
