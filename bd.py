@@ -10,6 +10,7 @@ class BD:
 		self.filter = Filter()
 
 	def create_tables(self):
+
 		""" Creating new base of date"""
 		self.cursor.execute("""
 			CREATE TABLE IF NOT EXISTS details 
