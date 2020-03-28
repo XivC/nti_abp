@@ -1,8 +1,11 @@
 import sqlite3
 from datetime import datetime
+
+
 def give_day():
 	today = datetime.today()
 	return (str(today.year)+"-"+str(today.month)+"-"+str(today.day))
+
 
 class BD:
 	def __init__(self, name_bd="mybd.sqlite"):
@@ -92,6 +95,7 @@ class BD:
 	def write_receipt_in_bd(self, data):
 		"""
 		Записывают в базу данных поставки
+		[(name, seria, count, name_admin, id_receipt, date), ]
 		:param data: список кортежей в каждом кортеже строчка из бд
 		:return: True
 		"""
@@ -158,8 +162,6 @@ class BD:
 		else:
 			self.change_status_request(request_id=id, status='Анулирована', delete_date=give_day())
 
-
-
 	def give_all_requests(self):
 		"""
 		:return ms = [[id, create_date, change_date, status, sum], ...]
@@ -212,23 +214,23 @@ class BD:
 		:return: True, if accessly, and False another
 		"""
 		if status == "Готова к отгрузке" :
-			if self.check_count_of_details(request_id):
-				self.minus_details(request_id)
-			else :
-				return None
+			data = self.check_count_of_details(request_id)
+			if data:
+				self.minus_details(data)
+			else:
+				return False
 
 		self.cursor.execute("""
 			UPDATE requests SET status = (?), change_date = (?), delete_date = (?) WHERE id = (?)
 		""", (status, give_day(), delete_day, request_id))
 		self.conn.commit()
 		return True
-	def minus_detail(self, request_id):
+
 
 	def check_count_of_details(self, request_id):
 		self.cursor.execute("""
 			SELECT * FROM buy_drons""")# WHERE id = (?)""", (request_id,))
 		drons = self.cursor.fetchall()
-		print(drons)
 		need = {}
 		for dron in drons:
 			self.cursor.execute("""
@@ -245,11 +247,21 @@ class BD:
 				SELECT count FROM receipts  WHERE name = ?
 			""", (key, ))
 			details = self.cursor.fetchall()
-			print(details, sm)
 			for detail in details:
 				sm = sm + int(detail[0])
-			if need[key] - sm < 0:
-				return False
+				if need[key] - sm > 0:
+					return False
+		return need
+
+
+	def minus_detail(self, data):
+		print(data)
+		ms = []
+		for key in data:
+			tp = (key, '', -data[key], 'Bulat', -1, give_day())
+			ms.append(tp)
+		print(ms)
+		self.write_receipt_in_bd(ms)
 		return True
 
 
@@ -528,4 +540,8 @@ print(test.test_give_me_spisok_of_receipts())
 
 db = BD()
 db.create_tables()
-print(db.check_count_of_details(2))
+data = db.check_count_of_details(1)
+if data:
+	db.minus_detail(data=data)
+else:
+	print('NO')
