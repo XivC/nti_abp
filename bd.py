@@ -1,10 +1,15 @@
 import sqlite3
 from datetime import datetime
 
-
+def tosq(date):
+    month = int(date.month)
+    month = str(month//10) + str(month % 10)
+    day= int(date.day)
+    day = str(day//10) + str(day % 10)
+    return str(date.year) + "-"+ str(month) + "-" + str(day)
 def give_day():
 	today = datetime.today()
-	return (str(today.year)+"-"+str(today.month)+"-"+str(today.day))
+	return tosq(today)
 
 
 class BD:
@@ -61,19 +66,19 @@ class BD:
 		return True
 
 	def insert_in_tables(self, details_table=[], drons_table=[], dron_map=[]):
-		details_table, list_of_traces1 = self.filter.filter_details_table(details_table)
+		#details_table, list_of_traces1 = self.filter.filter_details_table(details_table)
 		self.cursor.executemany("INSERT INTO details VALUES (?,?,?)", details_table)
 		self.conn.commit()
 		
-		drons_table, list_of_traces2 = self.filter.filter_details_table(drons_table)
+		#drons_table, list_of_traces2 = self.filter.filter_details_table(drons_table)
 		self.cursor.executemany("INSERT INTO drons VALUES (?,?,?)", drons_table)
 		self.conn.commit()
 
-		dron_map, list_of_traces3 = self.filter.filter_details_table(dron_map)
+		#dron_map, list_of_traces3 = self.filter.filter_details_table(dron_map)
 		self.cursor.executemany("INSERT INTO dron_map VALUES (?,?,?,?)", dron_map)
 		self.conn.commit()
 		
-		return list_of_traces1 + list_of_traces3 + list_of_traces2
+		return ['a']#list_of_traces1 + list_of_traces3 + list_of_traces2
 
 	def is_detail(self, name_detail):
 		"""Возвращает деталь ли это"""
@@ -153,14 +158,6 @@ class BD:
 			""", (id, dron[0], dron[1]))
 			self.conn.commit()
 
-		#TODO test me
-		if not self.check_buyer_in_fsb(buyer):
-			self.add_buyer_in_fsb(buyer)
-			self.change_status_request(request_id=id, status="Запрошено разрешение у ФСБ")
-		elif self.give_status_buyer_fsb(buyer):
-			self.change_status_request(request_id=id, status='Произвести сборку')
-		else:
-			self.change_status_request(request_id=id, status='Анулирована', delete_date=give_day())
 
 	def give_all_requests(self):
 		"""
@@ -196,25 +193,26 @@ class BD:
 		self.cursor.execute("""
 			SELECT cost FROM drons WHERE name_dron = ?
 		""", (dron[0],))
-		cost = self.cursor.fetchone()[0]
+		cost = int(self.cursor.fetchone()[0])
 		return cost * dron[1]
 
 	def change_status_request(self, request_id, status, delete_day=''):
 		"""
 		Меняет статус заказа
-
 		Создана
 		Идет сборка
 		Готова к отгрузке
 		Запрошено разрешение у ФСБ
 		Анулирована
 		Отгружена
-
 		:param request_id: unique id in table of requests
 		:return: True, if accessly, and False another
 		"""
-		if status == "Готова к отгрузке" :
+		iff = status == "Готово к отгрузке"
+		print("alalalala", iff )
+		if iff :
 			data = self.check_count_of_details(request_id)
+			print("data", data)
 			if data:
 				self.minus_details(data)
 			else:
@@ -231,6 +229,7 @@ class BD:
 		self.cursor.execute("""
 			SELECT * FROM buy_drons""")# WHERE id = (?)""", (request_id,))
 		drons = self.cursor.fetchall()
+		print("drns", drons)
 		need = {}
 		for dron in drons:
 			self.cursor.execute("""
@@ -241,20 +240,23 @@ class BD:
 				if not detail[2] in need:
 					need[detail[2]] = 0
 				need[detail[2]] = int(detail[3]) * int(dron[2])
+		print("need", need)
 		for key in need:
 			sm = 0
 			self.cursor.execute("""
 				SELECT count FROM receipts  WHERE name = ?
 			""", (key, ))
 			details = self.cursor.fetchall()
+			print("details", details)
 			for detail in details:
 				sm = sm + int(detail[0])
-				if need[key] - sm > 0:
-					return False
+				print("ns", need[key], sm)
+			if need[key] - sm > 0:
+				return False
 		return need
 
 
-	def minus_detail(self, data):
+	def minus_details(self, data):
 		print(data)
 		ms = []
 		for key in data:
@@ -281,10 +283,8 @@ class BD:
 	def change_status_fsb(self, buyer, status=1):
 		"""
 		Меняет статус у фсб
-
 		0 - если нет разрешения
 		1 - если да
-
 		:param buyer: Имя покупателя строки
 		:return: True/False if okey
 		"""
@@ -427,7 +427,7 @@ class Test1:
 		print(self.bd.give_request_sum(11))
 		return True
 
-Test1().test()
+#Test1().test()
 
 class Test:
 
@@ -519,29 +519,3 @@ class Test:
 		return data
 
 
-"""
-test = Test()
-test.test_bd()
-test.test_give_all_details()
-test.test_is_engine()
-test.test_is_detail()
-test.test_receipts_add()
-"""
-"""
-test = Test()
-test.test_is_digit()
-test.test_filters()
-"""
-"""
-test = Test()
-test.test_give_all_colums_less_date('2021-12-03')
-print(test.test_give_me_spisok_of_receipts())
-"""
-
-db = BD()
-db.create_tables()
-data = db.check_count_of_details(1)
-if data:
-	db.minus_detail(data=data)
-else:
-	print('NO')
